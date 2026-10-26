@@ -141,18 +141,36 @@ out += '</table>';
 
 // THE SIGNAL PAYLOAD (what actually gets hashed into the token)
 const sig = res && res.sig;
-if (sig && sig.length) {
-  const KNOWN = { 'bf':'screen-related metric', '97':'screen/UA field', '67':'screen/struct field', '8f':'UA-ish field',
+if (sig && sig.length && sig[0] && sig[0].length) {
+  const input = sig[0];   // one Nx input = the full multi-group payload
+  const KNOWN = { 'bf':'screen-related metric', '97':'screen/UA field', '8f':'UA-ish field',
     '14':'hash (canvas/render)', 'b4':'hash', '2c':'hash', '54':'hash', 'c4':'hash', 'd4':'hash', 'ec':'hash',
-    '24':'hash', 'a4':'hash', 'dc':'hash', 'fc':'hash', 'f7':'UA array', 'ff':'UA array' };
-  out += '<h2>THE SIGNAL PAYLOAD — captured pre-obfuscation ('+sig.length+' collections, what Nx() hashes)</h2>';
-  sig.forEach((group, gi) => {
-    out += '<h3>collection '+gi+' ('+group.length+' fields)</h3><table><tr><th>tag</th><th>value (hex)</th><th>note</th></tr>';
+    '24':'hash', 'a4':'hash', 'dc':'hash', 'fc':'hash', 'f7':'UA array', 'ff':'UA array',
+    '0b':'flag', '1d':'flag', '35':'count', '3e':'count', '47':'count', '4f':'count', '57':'count' };
+  const COL = ['device/render', 'context-2', 'context-3', 'context-4', 'context-5'];
+  const dec = hex => {
+    if (hex.length === 2) return parseInt(hex,16);
+    if (hex.length === 4) return parseInt(hex,16);
+    if (hex.length === 8) return parseInt(hex,16);
+    if (hex.length === 16) { const hi=parseInt(hex.slice(0,8),16), lo=parseInt(hex.slice(8),16); return (hi>0x7fffffff?'big':'')+hi*4294967296+lo; }
+    if (/^[0-9a-f]{2}(00){0,20}$/.test(hex)) { // runs of zeros -> likely a bitmask/flag
+      let n=0; for(let i=0;i<hex.length;i+=2) if(parseInt(hex.slice(i,i+2),16)!==0) n++;
+      return 'bitmask: '+n+' set';
+    }
+    return null;
+  };
+  const ascii = hex => { try{ const s=Buffer.from(hex,'hex').toString('utf8'); return /^[\x20-\x7e]{2,}$/.test(s) ? s : null; }catch(e){ return null; } };
+  out += '<h2>THE SIGNAL PAYLOAD — captured pre-obfuscation ('+input.length+' collections · '+input.reduce((a,g)=>a+g.length,0)+' fields, what Nx() hashes)</h2>'+
+    '<div class="big">same tag = same field type across collections; collections ≈ different sensor contexts. Values decoded where possible; long hex = opaque hashes.</div>';
+  input.forEach((group, gi) => {
+    out += '<h3>collection '+gi+' — '+esc(COL[gi]||'')+' ('+group.length+' fields)</h3><table><tr><th>tag</th><th>raw (hex)</th><th>decoded</th><th>note</th></tr>';
     for (const field of group) {
       const tag = field.slice(0,2);
       const val = field.slice(2);
+      const d = dec(val) ?? ascii(val);
+      const dv = d===null ? '<span class="dim">hash/opaque</span>' : esc(String(d));
       const note = KNOWN[tag] || '';
-      out += '<tr><td class="k">'+esc(tag)+'</td><td class="hex">'+esc(val.slice(0,120))+(val.length>120?'…':'')+'</td><td class="dim">'+esc(note)+'</td></tr>';
+      out += '<tr><td class="k">'+esc(tag)+'</td><td class="hex">'+esc(val.slice(0,120))+(val.length>120?'…':'')+'</td><td>'+dv+'</td><td class="dim">'+esc(note)+'</td></tr>';
     }
     out += '</table>';
   });
