@@ -66,7 +66,7 @@ const html = `<!doctype html><html><head><meta charset="utf-8"><title>Castle —
 window.__go=async()=>{ try{
   const C=window.Castle;
   C.configure({ pk: 'pk_AvRa79bHyJSYSQHnRpcVtzyxetSvFerx' });
-  window.__log('ok','[+] configured with a public publishable key (X/Twitter\'s, public)');
+  window.__log('ok','[+] configured with a public publishable key (X/Twitter\\'s, public)');
   window.__t1=await C.createRequestToken();
   window.__t2=await C.createRequestToken();
   window.__log('ok','[+] createRequestToken() x2 — tokens minted, client-side');
