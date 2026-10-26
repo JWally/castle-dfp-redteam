@@ -1,0 +1,12 @@
+{
+  "name": "dfp-redteam-castle",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Castle (castle.io) browser SDK client-side drill-down + token deobfuscation (authorized, own-stack, public assets only, 2026-10-26)",
+  "scripts": {
+    "visual": "node scripts/castle-visual.mjs",
+    "probe": "node scripts/castle-probe.mjs"
+  },
+  "dependencies": { "playwright": "^1" }
+}
