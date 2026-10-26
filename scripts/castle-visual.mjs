@@ -143,10 +143,18 @@ out += '</table>';
 const sig = res && res.sig;
 if (sig && sig.length && sig[0] && sig[0].length) {
   const input = sig[0];   // one Nx input = the full multi-group payload
-  const KNOWN = { 'bf':'screen-related metric', '97':'screen/UA field', '8f':'UA-ish field',
-    '14':'hash (canvas/render)', 'b4':'hash', '2c':'hash', '54':'hash', 'c4':'hash', 'd4':'hash', 'ec':'hash',
-    '24':'hash', 'a4':'hash', 'dc':'hash', 'fc':'hash', 'f7':'UA array', 'ff':'UA array',
-    '0b':'flag', '1d':'flag', '35':'count', '3e':'count', '47':'count', '4f':'count', '57':'count' };
+  const KNOWN = {
+    '03':'platform', '0b':'flag/state', '0c':'navigator block (UA/UA-CH)',
+    '1d':'deviceMemory', '25':'device/API flags (webdriver/plugins/cookies/dnt/tz/canvas/webgl)',
+    '27':'screen dims', '2d':'colorDepth', '35':'hardwareConcurrency', '3e':'devicePixelRatio',
+    '57':'plugins', '5f':'cookieEnabled', '6f':'screen metrics (avail/dpr)',
+    '75':'canvas fingerprint', '8f':'screen/UA composite', '97':'viewport (inner/outer)',
+    'e7':'maxTouchPoints', 'f7':'navigator/device composite',
+    '14':'ROTATING hash (salted, per-session)', 'b4':'ROTATING hash', '2c':'ROTATING hash',
+    '54':'ROTATING hash', 'c4':'ROTATING hash', 'd4':'ROTATING hash', 'ec':'ROTATING hash',
+    '24':'ROTATING hash', 'a4':'ROTATING hash', 'dc':'ROTATING hash', 'fc':'ROTATING hash',
+    '9c':'ROTATING hash', '6c':'ROTATING hash', '94':'ROTATING hash', '67':'ROTATING hash',
+    '87':'ROTATING hash', 'c5':'ROTATING hash' };
   const COL = ['device/render', 'context-2', 'context-3', 'context-4', 'context-5'];
   const dec = hex => {
     if (hex.length === 2) return parseInt(hex,16);
@@ -161,7 +169,8 @@ if (sig && sig.length && sig[0] && sig[0].length) {
   };
   const ascii = hex => { try{ const s=Buffer.from(hex,'hex').toString('utf8'); return /^[\x20-\x7e]{2,}$/.test(s) ? s : null; }catch(e){ return null; } };
   out += '<h2>THE SIGNAL PAYLOAD — captured pre-obfuscation ('+input.length+' collections · '+input.reduce((a,g)=>a+g.length,0)+' fields, what Nx() hashes)</h2>'+
-    '<div class="big">same tag = same field type across collections; collections ≈ different sensor contexts. Values decoded where possible; long hex = opaque hashes.</div>';
+    '<div class="big">tag meanings from a <b>single-signal differential</b> (mutate one browser attribute → observe which tag changes). '+
+    'Tags marked <span class="bad">ROTATING</span> change every session even with zero changes — they are salted/randomized, <b>not</b> stable device IDs.</div>';
   input.forEach((group, gi) => {
     out += '<h3>collection '+gi+' — '+esc(COL[gi]||'')+' ('+group.length+' fields)</h3><table><tr><th>tag</th><th>raw (hex)</th><th>decoded</th><th>note</th></tr>';
     for (const field of group) {

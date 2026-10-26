@@ -118,6 +118,40 @@ that the signals were honest.
 `castle-ids.json` (1,612 identifiers), `cs-captures.json` (string-table decodes),
 `castle-pool.js` (patched bundle).
 
+## 4c. ✅ Tag → field map (single-signal differential) + the ROTATING-hash finding
+
+Mutating one browser attribute at a time and diffing the captured payload
+reveals which tag carries which signal:
+
+| tag | meaning (from differential) |
+|---|---|
+| `03` | platform |
+| `0c` | navigator block (UA / UA-CH) |
+| `1d` | deviceMemory |
+| `25` | device/API flags (webdriver, plugins, cookies, dnt, tz, canvas, webgl) |
+| `27` | screen dims |
+| `2d` | colorDepth |
+| `35` | hardwareConcurrency |
+| `3e` | devicePixelRatio |
+| `57` | plugins |
+| `5f` | cookieEnabled |
+| `6f` | screen metrics (avail/dpr) |
+| `75` | canvas fingerprint |
+| `8f` | screen/UA composite |
+| `97` | viewport (inner/outer) |
+| `e7` | maxTouchPoints |
+| `f7` | navigator/device composite |
+
+**The ROTATING-hash finding:** the long value tags (`14, b4, 2c, 54, c4, d4,
+ec, 24, a4, dc, fc, 9c, 6c, 94, 67, 87, c5`) change on **every session even
+with zero browser changes** — they are **salted/randomized per session**, not
+stable device fingerprints. So the client's "hashes" do not themselves carry a
+stable identity; whatever device linkage exists is server-side (or via
+`__cuid`). That's another reason the client proves little on its own.
+
+Run: `scripts/castle-differential.mjs` · results:
+`artifacts/differential.json`.
+
 ## 5. Interview line
 > *"Castle is the most heavily obfuscated client I've seen — string tables,
 > encoded property names, ROT13 workers with anti-debug — but the request token
