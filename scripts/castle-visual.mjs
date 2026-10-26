@@ -20,7 +20,7 @@ import { dirname, join } from 'node:path';
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PORT = 9001;
-const bundle = readFileSync('/tmp/opencode/castle/castle-pool.js','utf8');
+const bundle = readFileSync('/tmp/opencode/castle/castle-signals.js','utf8');
 const POOL = readFileSync('/tmp/opencode/castle/pool.txt','utf8');
 const CS = JSON.parse(readFileSync('/tmp/opencode/castle/cs-captures.json','utf8'));
 
@@ -108,8 +108,10 @@ const res = await page.evaluate(()=>({
   cookie: document.cookie,
   net: window.__cap.net,
   b64: window.__cap.b64,
+  sig: window.__nx || null,
 })).catch(()=>null);
 await step('ok','[+] token minted: '+res.t1len+' chars · opaque · client-side (network log: '+(res.net||[]).length+' calls)');
+await step('ok','[+] captured the serialized signal payload (pre-obfuscation, '+(res.sig?res.sig.length:0)+' collections)');
 
 // build panels
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -136,6 +138,25 @@ const interesting = [...csmap.entries()].filter(([a,d])=>['webdriver','X-Castle-
 out += '<h2>RECOVERED STRING TABLE — highlights</h2><table><tr><th>decoded</th></tr>';
 for (const [,d] of interesting.slice(0,24)) out += '<tr><td class="k">'+esc(d)+'</td></tr>';
 out += '</table>';
+
+// THE SIGNAL PAYLOAD (what actually gets hashed into the token)
+const sig = res && res.sig;
+if (sig && sig.length) {
+  const KNOWN = { 'bf':'screen-related metric', '97':'screen/UA field', '67':'screen/struct field', '8f':'UA-ish field',
+    '14':'hash (canvas/render)', 'b4':'hash', '2c':'hash', '54':'hash', 'c4':'hash', 'd4':'hash', 'ec':'hash',
+    '24':'hash', 'a4':'hash', 'dc':'hash', 'fc':'hash', 'f7':'UA array', 'ff':'UA array' };
+  out += '<h2>THE SIGNAL PAYLOAD — captured pre-obfuscation ('+sig.length+' collections, what Nx() hashes)</h2>';
+  sig.forEach((group, gi) => {
+    out += '<h3>collection '+gi+' ('+group.length+' fields)</h3><table><tr><th>tag</th><th>value (hex)</th><th>note</th></tr>';
+    for (const field of group) {
+      const tag = field.slice(0,2);
+      const val = field.slice(2);
+      const note = KNOWN[tag] || '';
+      out += '<tr><td class="k">'+esc(tag)+'</td><td class="hex">'+esc(val.slice(0,120))+(val.length>120?'…':'')+'</td><td class="dim">'+esc(note)+'</td></tr>';
+    }
+    out += '</table>';
+  });
+}
 out += '<div class="big"><b>Takeaway:</b> obfuscation is heavy but the token is client-minted + client-checksummed — the real defense is Castle\'s <b>server-side risk scoring</b>.</div>';
 await page.evaluate(h=>window.__render(h), out);
 await step('dim','———— done · close the window to exit —————');
