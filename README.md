@@ -87,3 +87,14 @@ node scripts/castle-visual.mjs    # headed demo (close window to exit)
 > in the SDK. Public tools already mint valid tokens headlessly from the
 > publishable key. So the client proves nothing about honesty; the protection
 > is their server-side risk scoring."*
+
+## Demo video — the client-minted token
+
+`assets/videos/full-payload-demo.mp4` — a terminal-capture video of
+`scripts/demo-castle.py` showing the **client-minted Castle token** (0 network
+calls; `__cuid` + request token computed entirely client-side from the bundle).
+Reproduce it yourself:
+
+```bash
+python3 scripts/demo-castle.py artifacts/differential.json
+```
