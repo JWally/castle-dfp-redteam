@@ -104,4 +104,5 @@ Reproduce it yourself:
 python3 scripts/demo-castle.py artifacts/differential.json
 ```
 
+Full artifact: [differential.json](artifacts/differential.json)
 [Download the mp4](https://raw.githubusercontent.com/JWally/dfp-redteam-castle/main/assets/videos/full-payload-demo.mp4)
