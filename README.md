@@ -90,11 +90,18 @@ node scripts/castle-visual.mjs    # headed demo (close window to exit)
 
 ## Demo video — the client-minted token
 
-`assets/videos/full-payload-demo.mp4` — a terminal-capture video of
-`scripts/demo-castle.py` showing the **client-minted Castle token** (0 network
-calls; `__cuid` + request token computed entirely client-side from the bundle).
+**Watch the capture** (terminal capture of `scripts/demo-castle.py` showing the
+client-minted Castle token — 0 network calls; `__cuid` + request token computed
+entirely client-side from the bundle):
+
+<img src="assets/videos/full-payload-demo.gif" width="720" alt="Castle client-minted token demo" />
+
+<video controls preload="metadata" width="720"><source src="assets/videos/full-payload-demo.mp4" type="video/mp4"></video>
+
 Reproduce it yourself:
 
 ```bash
 python3 scripts/demo-castle.py artifacts/differential.json
 ```
+
+[Download the mp4](https://raw.githubusercontent.com/JWally/dfp-redteam-castle/main/assets/videos/full-payload-demo.mp4)
